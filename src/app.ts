@@ -12,6 +12,8 @@ import passport from "passport";
 import expressValidator from "express-validator";
 import validator from "./controllers/validatort";
 import "express-async-errors";
+import cors from "cors";
+
 dotenv.config({ path: ".env.stage" });
 // Create Express server
 const app = express();
@@ -27,6 +29,7 @@ app.use(passport.session());
 app.use(flash());
 app.use(lusca.xframe("SAMEORIGIN"));
 app.use(lusca.xssProtection(true));
+app.use(cors());
 app.use(validator);
 fs.readdirSync(__dirname + "/routes")
   .forEach((file: string) => {
