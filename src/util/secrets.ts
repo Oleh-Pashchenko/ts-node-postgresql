@@ -20,6 +20,9 @@ export const NODEMAILER_SERVICE = process.env["NODEMAILER_SERVICE"];
 export const NODEMAILER_USER = process.env["NODEMAILER_USER"];
 
 export const NODEMAILER_PASSWORD = process.env["NODEMAILER_PASSWORD"];
+
+export const NODEMAILER_HOST = process.env["NODEMAILER_HOST"];
+
 export const POSTGRESQL_URI = prod ? process.env["POSTGRESQL_URI"] : process.env["POSTGRESQL_URI"];
 
 if (!SESSION_SECRET) {

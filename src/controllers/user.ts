@@ -17,6 +17,14 @@ export const getCollectedData = async (req: Request, res: Response) =>
 
 export const putUpdate = async (req: Request, res: Response) =>
   res.json(await UserService.update(req.params.user.id, req.body));
+export const putPasswordReset = async (req: Request, res: Response) =>
+  res.json(await UserService.passwordReset(req.params.user.id, req.body));
+
+export const postPasswordForgot = async (req: Request, res: Response) =>
+  res.json(await UserService.passwordForgot(req.body.email));
+
+export const putPasswordForgot = async (req: Request, res: Response) =>
+  res.json(await UserService.passwordUpdate(req.body.token, req.body));
 
 export const deleteUser = async (req: Request, res: Response) =>
   res.json(await UserService.delete(+req.params.user.id));

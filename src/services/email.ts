@@ -3,7 +3,8 @@ import { IMail } from "../interfaces/mail";
 import {
   NODEMAILER_PASSWORD,
   NODEMAILER_SERVICE,
-  NODEMAILER_USER
+  NODEMAILER_USER,
+  NODEMAILER_HOST
 } from "../util/secrets";
 
 const transporter = nodemailer.createTransport({
@@ -33,7 +34,18 @@ class EmailService {
       to: to,
       from: NODEMAILER_USER,
       subject: "Email verification",
-      html: `<a href="http://localhost:3000/api/v1/user/email-verify?token=${token}">Verify</a>`
+      html: `<a href="${NODEMAILER_HOST}api/v1/user/email-verify?token=${token}">Verify</a>`
+
+    };
+    return await EmailService.send(mail);
+  }
+
+  public static async resetPassword(token: string, to: string): Promise<void> {
+    const mail: IMail = {
+      to: to,
+      from: NODEMAILER_USER,
+      subject: "Forgot email",
+      html: `<a href="/reset-password?token=${token}">Reset password</a>`
 
     };
     return await EmailService.send(mail);

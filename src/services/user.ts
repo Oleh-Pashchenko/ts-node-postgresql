@@ -4,6 +4,8 @@ import { IUserModel } from "../interfaces/user";
 import { SESSION_SECRET } from "../util/secrets";
 import { IJWT } from "../interfaces/jwt";
 import { ILogin } from "../interfaces/login";
+import { IPasswordReset } from "../interfaces/passwordReset";
+import { IPasswordForgot } from "../interfaces/passwordForgot";
 import Sequelize from "sequelize";
 import EmailService from "../services/email";
 import BcryptService from "../services/bcrypt";
@@ -14,7 +16,7 @@ class UserService {
     const userData = userInstance;
     const userId = userData.getDataValue("id");
     const userEmail = userData.getDataValue("email");
-    const emailVerification = UserService.generateEmailVerificationToken(userId);
+    const emailVerification = UserService.generateToken(userId);
 
     await EmailService.verify(emailVerification, userEmail);
 
@@ -31,6 +33,43 @@ class UserService {
     }
 
     throw new Error("Wrong password");
+  }
+
+  public static async passwordReset(userInstance: Sequelize.Instance<IUserModel>, password: IPasswordReset): Promise<IUserModel> {
+    const userId = userInstance.getDataValue("id");
+    const userData = (userInstance as any).dataValues;
+    const res = BcryptService.validPassword(password.oldPassword, userData.password);
+    if (res) {
+      userData.password = BcryptService.generateHash(password.newPassword);
+      return UserService.update(userId, userData);
+    }
+    throw new Error("Wrong old password");
+  }
+
+  public static async passwordForgot(email: string): Promise<void> {
+    const userInstance: Sequelize.Instance<IUserModel> =
+      await DatabaseService.models.user.findOne({ where: { email: email } });
+    if (userInstance) {
+      const token = UserService.generateToken(email);
+      return EmailService.resetPassword(token, email);
+    }
+
+    throw new Error(`User not found by email: ${email}`);
+  }
+
+  public static async passwordUpdate(token: string, password: IPasswordForgot): Promise<IUserModel> {
+    const email = jwt.verify(token, SESSION_SECRET);
+    const userInstance: Sequelize.Instance<IUserModel> =
+      await DatabaseService.models.user.findOne({ where: { email: email } });
+
+    if (userInstance) {
+      const userId = userInstance.getDataValue("id");
+      const userData = (userInstance as any).dataValues;
+      userData.password = BcryptService.generateHash(password.newPassword);
+      return UserService.update(userId, userData);
+    }
+
+    throw new Error(`User not found by email: ${email}`);
   }
 
   public static async read(id: number): Promise<IUserModel> {
@@ -61,7 +100,7 @@ class UserService {
     return await UserService.update(verified, (user as any).dataValues);
   }
 
-  public static generateEmailVerificationToken(data: string): string {
+  public static generateToken(data: string): string {
     return jwt.sign(data, SESSION_SECRET, {
       // expiresIn: 60
     });
