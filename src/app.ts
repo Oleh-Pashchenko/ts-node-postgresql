@@ -11,14 +11,20 @@ import swaggerDocument from "./swagger";
 import passport from "passport";
 import expressValidator from "express-validator";
 import validator from "./controllers/validatort";
+import rateLimit from "express-rate-limit";
 import "express-async-errors";
 import cors from "cors";
 
 dotenv.config({ path: ".env.stage" });
 // Create Express server
 const app = express();
+const apiLimiter = new rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100
+});
 
 // Express configuration
+app.enable("trust proxy");
 app.set("port", process.env.PORT || 3000);
 app.use(compression());
 app.use(bodyParser.json());
@@ -30,6 +36,7 @@ app.use(flash());
 app.use(lusca.xframe("SAMEORIGIN"));
 app.use(lusca.xssProtection(true));
 app.use(cors());
+app.use(apiLimiter);
 app.use(validator);
 fs.readdirSync(__dirname + "/routes")
   .forEach((file: string) => {
