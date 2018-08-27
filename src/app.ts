@@ -25,6 +25,7 @@ const apiLimiter = new rateLimit({
 
 // Express configuration
 app.enable("trust proxy");
+app.disable("x-powered-by");
 app.set("port", process.env.PORT || 3000);
 app.use(compression());
 app.use(bodyParser.json());
