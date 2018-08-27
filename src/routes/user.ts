@@ -13,6 +13,10 @@ import {
   putUpdate,
   auth
 } from "../controllers/user";
+import ExpressBrute from "express-brute";
+const store = new ExpressBrute.MemoryStore();
+const bruteForce = new ExpressBrute(store);
+
 const router = Router();
 router.get("/collected-data", auth, getCollectedData);
 router.get("/email-verify", getEmailVerify);
@@ -20,7 +24,7 @@ router.get("/", auth, getRead);
 
 router.post("/refresh-token", postRefreshToken);
 router.post("/password-forgot", postPasswordForgot);
-router.post("/login", postLogin);
+router.post("/login", bruteForce.prevent, postLogin);
 router.post("/", postCreate);
 
 
